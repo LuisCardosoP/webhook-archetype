@@ -23,9 +23,9 @@ logging:
     com.familia: DEBUG
 
 twilio:
-  account-sid: ${TWILIO_ACCOUNT_SID:your-account-sid}
-  auth-token: ${TWILIO_AUTH_TOKEN:your-auth-token}
-  from-number: ${TWILIO_FROM_NUMBER:+1234567890}
+  account-sid: TU_ACCOUNT_SID_AQUI
+  auth-token: TU_AUTH_TOKEN_AQUI
+  from-number: "+TU_NUMERO_AQUI"
 
 webhook:
-  secret: ${WEBHOOK_SECRET:mi-secreto-demo}
+  secret: TU_SECRETO_AQUI

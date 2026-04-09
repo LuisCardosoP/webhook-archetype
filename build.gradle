@@ -4,7 +4,7 @@ plugins {
 	id 'java'
 }
 
-group = 'com.familia.api'
+group = 'familia-api'
 version = '2.0.0-SNAPSHOT'
 sourceCompatibility = '17'
 
