@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Demo - Webhooks</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; padding: 40px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; color: #333; }
+        .product-card {
+            background: white; border-radius: 12px; padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
+        .product-card h2 { color: #222; margin-bottom: 8px; }
+        .product-card .price { font-size: 24px; color: #2ecc71; font-weight: bold; margin-bottom: 16px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; color: #555; font-size: 14px; }
+        .form-group input {
+            width: 100%; padding: 10px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px;
+        }
+        .btn-buy {
+            width: 100%; padding: 14px; background: #2ecc71; color: white;
+            border: none; border-radius: 8px; font-size: 16px; cursor: pointer;
+            font-weight: bold; margin-top: 8px;
+        }
+        .btn-buy:hover { background: #27ae60; }
+        .btn-buy:disabled { background: #95a5a6; cursor: not-allowed; }
+        .result {
+            margin-top: 16px; padding: 12px; border-radius: 8px;
+            font-size: 14px; display: none;
+        }
+        .result.success { display: block; background: #d5f5e3; color: #1e8449; }
+        .result.error { display: block; background: #fadbd8; color: #c0392b; }
+        .result.loading { display: block; background: #ebf5fb; color: #2980b9; }
+        .flow-info {
+            background: #fff3cd; border-radius: 8px; padding: 16px;
+            margin-bottom: 20px; font-size: 13px; color: #856404;
+        }
+        .flow-info strong { display: block; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Tienda Demo</h1>
+
+        <div class="flow-info">
+            <strong>Flujo del Webhook:</strong>
+            1. Haces clic en "Comprar" → 2. El backend dispara un webhook interno →
+            3. El receptor valida la firma HMAC → 4. Se envía un SMS con Twilio
+        </div>
+
+        <div class="product-card">
+            <h2>Laptop Dell XPS 15</h2>
+            <div class="price">$1,299.99 MXN</div>
+
+            <div class="form-group">
+                <label for="name">Tu nombre</label>
+                <input type="text" id="name" placeholder="Juan Pérez">
+            </div>
+            <div class="form-group">
+                <label for="phone">Tu celular (formato: +521234567890)</label>
+                <input type="tel" id="phone" placeholder="+521234567890">
+            </div>
+
+            <button class="btn-buy" id="btnBuy" onclick="comprar()">Comprar ahora</button>
+
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Cambia esta URL según tu entorno
+        const API_URL = 'http://localhost:8239/webhook-sms/api/v1/purchase';
+
+        async function comprar() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const btn = document.getElementById('btnBuy');
+            const result = document.getElementById('result');
+
+            if (!name || !phone) {
+                showResult('Completa tu nombre y celular', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+            showResult('Procesando compra y disparando webhook...', 'loading');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: 'ORD-' + Date.now(),
+                        customerName: name,
+                        phoneNumber: phone,
+                        productName: 'Laptop Dell XPS 15',
+                        amount: 1299.99,
+                        currency: 'MXN'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('✅ Compra exitosa. Revisa tu SMS.', 'success');
+                } else {
+                    showResult('❌ Error: ' + (data.userMessage || 'Error desconocido'), 'error');
+                }
+            } catch (err) {
+                showResult('❌ No se pudo conectar al servidor: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Comprar ahora';
+            }
+        }
+
+        function showResult(msg, type) {
+            const result = document.getElementById('result');
+            result.className = 'result ' + type;
+            result.textContent = msg;
+        }
+    </script>
+</body>
+</html>

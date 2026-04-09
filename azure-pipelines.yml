@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - develop
+      #- staging
+      #- master
+  batch: true # Agrupa múltiples cambios en un solo Job
+pool:
+  name: 'familia-dev3'
+  vmImage: 'ubuntu-latest'
+  maxParallel: 3
+
+resources:
+  repositories:
+    - repository: co-gdbs-digitaltrans-templates-devops
+      type: git
+      name: co-gdbs-digitaltrans-templates-devops
+      ref: refs/heads/main
+
+extends:
+  template: templates/backend/api/backend-template.yml@co-gdbs-digitaltrans-templates-devops
+  parameters:
+    PROJECT: "appnol-archetype-api"
+    IMAGE_NAME: "familia/appnol-archetype-api"
+    VERSION: "0.0.1"
