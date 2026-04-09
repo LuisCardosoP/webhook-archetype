@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["jdk17", "gradle"]
+
+[phases.build]
+cmds = ["gradle clean build -x test -x check"]
+
+[start]
+cmd = "java -jar -Dserver.port=$PORT build/libs/app.jar"
