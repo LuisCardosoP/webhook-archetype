@@ -35,7 +35,7 @@ public class WebhookBusinessImpl implements WebhookBusiness {
     @Value("${webhook.secret}")
     private String webhookSecret;
 
-    @Value("${server.port:8239}")
+    @Value("${PORT:${server.port:8239}}")
     private String serverPort;
 
     @Value("${server.servlet.context-path:/webhook-sms}")
